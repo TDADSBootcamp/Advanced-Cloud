@@ -1,0 +1,14 @@
+# a directory for things that aren't suitable to share
+uncommitted/
+
+# Python compilation cache
+__pycache__
+
+# memory profiler outputs
+mprofile_*
+
+#Jupyter checkpoints
+.ipynb_checkpoints/
+
+# venv in project
+.venv/

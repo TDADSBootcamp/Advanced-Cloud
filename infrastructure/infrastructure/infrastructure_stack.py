@@ -27,10 +27,11 @@ class InfrastructureStack(cdk.Stack):
   def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
     super().__init__(scope, construct_id, **kwargs)
 
-    student_count = os.environ['STUDENT_COUNT']
     billing_alert_emails = os.environ['BILLING_ALERT_EMAILS'].split(',')
 
     example_bucket = s3.Bucket(self, 'example-bucket', versioned=True)
+    # so that stack does not fail if there are objects in the bucket
+    example_bucket.apply_removal_policy(cdk.RemovalPolicy.RETAIN)
 
     student_group = iam.Group(
         self,
@@ -38,7 +39,11 @@ class InfrastructureStack(cdk.Stack):
         group_name='students',
         managed_policies=[
             iam.ManagedPolicy.from_aws_managed_policy_name(
-                'AmazonAthenaFullAccess')
+                'AmazonAthenaFullAccess'),
+            iam.ManagedPolicy.from_aws_managed_policy_name(
+                'AWSGlueConsoleFullAccess'),
+            iam.ManagedPolicy.from_aws_managed_policy_name(
+                'AmazonS3FullAccess')
         ])
 
     student_group.add_to_policy(
@@ -80,12 +85,6 @@ class InfrastructureStack(cdk.Stack):
                 ])
         ])
 
-    spark = emr_cluster.EMRClusterStack(
-        self,
-        'emr_cluster',
-        s3_log_bucket=example_bucket.bucket_name,
-        s3_script_bucket=example_bucket.bucket_name)
-
     notebook_role = iam.Role(self,
                              'notbooks_access_role',
                              assumed_by=iam.ServicePrincipal('sagemaker'),
@@ -103,14 +102,9 @@ class InfrastructureStack(cdk.Stack):
                                          resources=[example_bucket.bucket_arn])
                                  ]).attach_to_role(notebook_role)
 
-    instance = sm.CfnNotebookInstance(self,
-                                      'notebook',
-                                      instance_type='ml.t2.medium',
-                                      volume_size_in_gb=5,
-                                      notebook_instance_name='notebook',
-                                      role_arn=notebook_role.role_arn)
-
-
-app = cdk.App()
-
-InfrastructureStack(app, 'DataSciStack')
+    # instance = sm.CfnNotebookInstance(self,
+    #                                   'notebook',
+    #                                   instance_type='ml.t2.medium',
+    #                                   volume_size_in_gb=5,
+    #                                   notebook_instance_name='notebook',
+    #                                   role_arn=notebook_role.role_arn)

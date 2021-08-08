@@ -6,9 +6,8 @@ echo "Pre-reqs: cdk, member AWS account, admin-level role in target account with
 
 export ACCOUNT_ID=$1
 export AWS_PROFILE=$2
-export STUDENT_COUNT=$3
-export BILLING_ALERT_EMAILS=$4
-export REGION=${5:-eu-west-2}
+export BILLING_ALERT_EMAILS=$3
+export REGION=${4:-eu-west-2}
 
 aws iam update-account-password-policy \
   --minimum-password-length 20 \

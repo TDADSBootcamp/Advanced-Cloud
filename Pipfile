@@ -10,6 +10,7 @@ name = "pypi"
 [dev-packages]
 yapf = "*"
 pylint = "*"
+nbconvert = "*"
 
 [requires]
 python_version = "3.8"

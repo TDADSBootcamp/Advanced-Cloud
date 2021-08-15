@@ -21,6 +21,16 @@ def random_string(length: int) -> str:
     '''
   return ''.join(random.choice(string.ascii_lowercase) for i in range(length))
 
+s3_glue_athena_sagemaker_full_access_policies = [
+    iam.ManagedPolicy.from_aws_managed_policy_name(
+        'AmazonAthenaFullAccess'),
+    iam.ManagedPolicy.from_aws_managed_policy_name(
+        'AWSGlueConsoleFullAccess'),
+    iam.ManagedPolicy.from_aws_managed_policy_name(
+        'AmazonS3FullAccess'),
+    iam.ManagedPolicy.from_aws_managed_policy_name(
+        'AmazonSageMakerFullAccess')
+]
 
 class InfrastructureStack(cdk.Stack):
 
@@ -37,14 +47,7 @@ class InfrastructureStack(cdk.Stack):
         self,
         'students',
         group_name='students',
-        managed_policies=[
-            iam.ManagedPolicy.from_aws_managed_policy_name(
-                'AmazonAthenaFullAccess'),
-            iam.ManagedPolicy.from_aws_managed_policy_name(
-                'AWSGlueConsoleFullAccess'),
-            iam.ManagedPolicy.from_aws_managed_policy_name(
-                'AmazonS3FullAccess')
-        ])
+        managed_policies=s3_glue_athena_sagemaker_full_access_policies)
 
     student_group.add_to_policy(
         iam.PolicyStatement(actions=['s3:*'],
@@ -88,10 +91,7 @@ class InfrastructureStack(cdk.Stack):
     notebook_role = iam.Role(self,
                              'notbooks_access_role',
                              assumed_by=iam.ServicePrincipal('sagemaker'),
-                             managed_policies=[
-                                 iam.ManagedPolicy.from_aws_managed_policy_name(
-                                     'AmazonSageMakerFullAccess')
-                             ])
+                             managed_policies=s3_glue_athena_sagemaker_full_access_policies)
 
     notebook_policy = iam.Policy(self,
                                  'notebook_access_policy',

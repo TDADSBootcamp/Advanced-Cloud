@@ -52,6 +52,7 @@ class InfrastructureStack(cdk.Stack):
     student_group.add_to_policy(
         iam.PolicyStatement(actions=['s3:*'],
                             resources=[example_bucket.bucket_arn]))
+    
 
     with open(os.path.join(sys.path[0],
                            'user_credentials_policy.json')) as policy_json:

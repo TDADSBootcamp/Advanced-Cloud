@@ -1,8 +1,11 @@
+'Scripting cleanup of user artifacts for AWS account deletion'
+
 import typing
 import argparse
 
 import boto3
 from botocore.exceptions import ClientError
+
 
 class Args(typing.NamedTuple):
   profile: str
@@ -10,10 +13,13 @@ class Args(typing.NamedTuple):
 
 def parse_args() -> Args:
   parser = argparse.ArgumentParser(description='User admin functions')
-  parser.add_argument('--profile', default='default', help='AWS profile to use for these operations')
+  parser.add_argument('--profile',
+                      default='default',
+                      help='AWS profile to use for these operations')
 
   parsed = parser.parse_args()
   return Args(profile=parsed.profile)
+
 
 def get_student_group(session, student_group_name: str = 'students'):
   iam = session.resource('iam')
@@ -26,6 +32,7 @@ def get_student_group(session, student_group_name: str = 'students'):
       return None
     else:
       raise ce
+
 
 def delete_user(user):
   print(f'Deleting user "{user.user_name}"')
@@ -62,7 +69,10 @@ def clear_student_group(group):
 
 
 def delete_buckets(session):
-  for bucket_name in (bucket['Name'] for bucket in session.client('s3').list_buckets()['Buckets'] if 'cdktoolkit' not in bucket['Name']):
+  for bucket_name in (
+      bucket['Name']
+      for bucket in session.client('s3').list_buckets()['Buckets']
+      if 'cdktoolkit' not in bucket['Name']):
     print(f'Clearing and deleting bucket "{bucket_name}"')
     bucket = session.resource('s3').Bucket(bucket_name)
     if bucket.Versioning().status == 'Enabled':
@@ -86,6 +96,6 @@ def main(args: Args):
 
     clear_student_group(student_group)
 
+
 if __name__ == '__main__':
-  args = parse_args()
-  main(args)
+  main(parse_args())

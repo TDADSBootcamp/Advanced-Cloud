@@ -5,6 +5,7 @@ import argparse
 
 import boto3
 from botocore.exceptions import ClientError
+from botocore.config import Config
 
 
 class Args(typing.NamedTuple):
@@ -81,10 +82,38 @@ def delete_buckets(session):
     bucket.delete()
 
 
+def delete_notebook(sagemaker_client, notebook_instance_name: str):
+  print(f'Deleting notebook instance {notebook_instance_name}')
+
+  try:
+    sagemaker_client.stop_notebook_instance(NotebookInstanceName=notebook_instance_name)
+  except ClientError as ce:
+    if ce.response['Error']['Code'] != 'ValidationException':
+      raise ce
+
+  sagemaker_client.delete_notebook_instance(NotebookInstanceName=notebook_instance_name)
+
+
+def delete_sagemaker_notebooks(session):
+  sagemaker_client = session.client('sagemaker', config=Config(region_name='eu-west-2'))
+  response = sagemaker_client.list_notebook_instances(MaxResults=100)
+  names = [
+      instance['NotebookInstanceName']
+      for instance in response['NotebookInstances']
+  ]
+
+  print(f'Found {len(names)} notebook instances')
+
+  for notebook in names:
+    delete_notebook(sagemaker_client, notebook_instance_name=notebook)
+
+
 def main(args: Args):
   session = boto3.session.Session(profile_name=args.profile)
 
   delete_buckets(session)
+
+  delete_sagemaker_notebooks(session)
 
   student_group = get_student_group(session)
 

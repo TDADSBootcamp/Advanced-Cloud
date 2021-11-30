@@ -22,7 +22,6 @@
 - create a bucket
 - upload this readme file
 - make the readme file public
-- view the readme in an incognito window
 - copy the access log from `s3://843328850426-access-log/access_masked.log.gz` to your bucket
 - list the content of your bucket
 - how is the content sorted? Can you list it in reverse order?
